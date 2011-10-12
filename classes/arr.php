@@ -82,6 +82,27 @@ class Arr {
     /// END OF STATICS ///
 
     /**
+	 * Returns the string formed by concatenating the array elements with the
+     * join string between each one, a la implode
+     *
+	 * @param   String   $str    The interstitial string
+     * @return  String
+	 */
+    public function join($string) {
+        return implode($string, $this->_arr);
+    }
+
+    /**
+     * Alias for join
+     *
+	 * @param   String   $str    The interstitial string
+     * @return  String
+	 */
+    public function implode($string) {
+        return implode($string, $this->_arr);
+    }
+
+    /**
 	 * Returns the Arr formed by applying $function to each element of this
      * object and collecting the return values. Returns a new Arr; does not
      * alter the object.
@@ -93,7 +114,7 @@ class Arr {
      * @return  \Arr\Arr
 	 */
     public function map($function) {
-        if (!is_callable($f)) {
+        if (!is_callable($function)) {
             $f = $function;
             $function = function($_) use ($f) {
                 return eval($f);
@@ -114,7 +135,7 @@ class Arr {
      * @return  \Arr\Arr
 	 */
     public function grep($function) {
-        if (!is_callable($f)) {
+        if (!is_callable($function)) {
             $f = $function;
             $function = function($_) use ($f) {
                 return eval($f);
@@ -122,5 +143,54 @@ class Arr {
         }
             
         return new static(array_filter($this->_arr, $function));
+    }
+
+    /**
+	 * Alias for grep
+     *
+	 * @param   callable   $func    The function to apply
+     * @return  \Arr\Arr
+	 */
+    public function filter($function) {
+        return $this->grep($function);
+    }
+
+    /**
+	 * Sort the array by its values, preserving keys, using the provided
+     * function. If no function is provided, the < / > operators are used, which
+     * is to say the behaviour is totally unpredictable.
+     *
+     * As a special treat, if you provide a non-callable string, it will be used
+     * as the body of a new function. The parameters to the function will be $a
+     * and $b.
+     *
+	 * @param   callable   $func    The function to apply. Takes two parameters.
+     * @return  \Arr\Arr
+	 */
+    public function sort($function=null) {
+        if (null === $function) {
+            $function = function($a, $b) {
+                return ($a < $b) ? -1 : ($a == $b) ? 0 : 1;
+            };
+        }
+        if (!is_callable($function)) {
+            $f = $function;
+            $function = function($a, $b) use ($f) {
+                return eval($f);
+            };
+        }
+            
+        return new static(uasort($this->_arr, $function));
+    }
+
+
+    /**
+	 * Return the values of the array in whatever internal order they are in,
+     * effectively discarding the keys and making an ordinal array.
+     *
+     * @return  \Arr\Arr
+	 */
+    public function values() {
+        return new static(array_values($this->_arr));
     }
 }
