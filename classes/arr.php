@@ -183,7 +183,7 @@ class Arr {
     }
 
     /**
-	 * Sort the array by its values, preserving keys, using the provided
+     * Sort the array by its values, discarding keys, using the provided
      * function. If no function is provided, the < / > operators are used, which
      * is to say the behaviour is totally unpredictable.
      *
@@ -207,6 +207,16 @@ class Arr {
             };
         }
             
-        return new static(uasort($this->_arr, $function));
+        return new static(usort($this->_arr, $function));
+    }
+
+    /**
+	 * Return the values of the array in whatever internal order they are in,
+     * effectively discarding the keys and making an ordinal array.
+     *
+     * @return  \Arr\Arr
+	 */
+    public function values() {
+        return new static(array_values($this->_arr));
     }
 }
