@@ -24,7 +24,7 @@ class Arr {
 	 *
 	 * @param   array   $array    The search array
 	 */
-    public function __construct($arr) {
+    public function __construct($arr=array()) {
         $this->_arr = $arr;
     }
 
@@ -54,8 +54,8 @@ class Arr {
      * delimiters as it will be used inside another regex and that'll break it
      * so don't.
      *
-	 * @param   String   $regex   A regex by which to split the string
-     * @param   String   $string  The string to split.
+	 * @param   String  $regex   A regex by which to split the string
+     * @param   String  $string  The string to split.
      * @return  \Arr\Arr
 	 */
     public static function split($regex, $string) {
@@ -76,7 +76,7 @@ class Arr {
 	 * Performs the same function as new \Arr\Arr(explode($delim, $string))
      *
 	 * @param   String   $delim     The delimiter string
-     * @param   String   $string  The string to split.
+     * @param   String   $string    The string to split.
      * @return  \Arr\Arr
 	 */
     public static function explode($spl, $string) {
@@ -86,20 +86,96 @@ class Arr {
 
     /// END OF STATICS ///
 
-    // Mutators, accessors //
+    // Accessors //
+
+    /**
+     * Returns the array elements at the given indices. If any index is an array
+     * it is taken to be itself a list of indices. If any of *those* is an array
+     * then stop being silly.
+     *
+     * Returns a new Arr containing those elements.
+     *
+     * @param   mixed   $index  Index or array of indices to take
+     * @param   mixed   ...     More of the same
+     * @return  \Arr\Arr
+     */
+    public function slice() {
+        $take = new static();
+
+        foreach(func_get_args() as $arg) {
+            if (is_array($arg)) {
+                $take->concat( call_user_func_array($this, 'slice', $arg) );
+            }
+            else {
+                if ($arg < 0) {
+                    $arg = count($this->_arr) + $arg;
+                }
+                $take->push( $this->_arr[$arg] );
+            }
+        }
+    }
+
+    // Mutators //
 
     /**
      * Adds these arrays to the array, merging them all and destroying any
      * key/value associations. Modifies the object.
      *
-     * @param  Array  $arr  Array to merge
-     * @param  Array  ...   Additional arrays
-     * @return $this
+     * @param   Array   $arr    Array to merge
+     * @param   Array   ...     Additional arrays
+     * @return  $this
      */
     public function concat() {
         foreach(func_get_args() as $arr) {
             $this->_arr = array_merge($this->_arr, array_values($arr));
         }
+
+        return $this;
+    }
+
+    /**
+     * Adds items onto the end of the array. Returns the Arr again for chaining.
+     *
+     * @param   mixed   $any    Anything
+     * @param   mixed   ...     Any more things
+     * @return  $this
+     */
+    public function push() {
+        $this->splice(count($this->_arr), 0, func_get_args());
+
+        return $this;
+    }
+
+    /**
+     * Adds items onto the front of the array. Returns the Arr again for
+     * chaining.
+     *
+     * @param   mixed   $any    Anything
+     * @param   mixed   ...     Any more things
+     * @return  $this
+     */
+    public function unshift() {
+        $this->splice(0, 0, func_get_args());
+
+        return $this;
+    }
+
+    /**
+     * Removes $length items from the index $start, and replaces them with
+     * $array if provided. $array is converted to an array if it is not one.
+     * Returns the Arr again for chaining.
+     *
+     * If no $length is provided then the array is truncated at $start.
+     *
+     * If $start is negative then it is counted from the end of the array.
+     *
+     * @param   int     $start      Index of first removed item
+     * @param   int     $length     Optional number of items to remove
+     * @param   array   $rep        Optional replacement array
+     * @return  $this
+     */
+    public function splice($start, $length=null, $rep=null) {
+        array_splice($this->_arr, $length, $rep);
 
         return $this;
     }
