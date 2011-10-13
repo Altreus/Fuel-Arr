@@ -5,6 +5,11 @@
  * functions, as well as adding a few that PHP should support but which are
  * presumably too complex for PHP users to understand.
  *
+ * This is currently intended to represent an ordinal array, but a future
+ * development will allow non-numeric keys to work, given that PHP's associative
+ * arrays have an unfathomable internal ordering and hence it should be
+ * workable.
+ *
  * @package     Arr
  */
 
@@ -81,6 +86,26 @@ class Arr {
 
     /// END OF STATICS ///
 
+    // Mutators, accessors //
+
+    /**
+     * Adds these arrays to the array, merging them all and destroying any
+     * key/value associations. Modifies the object.
+     *
+     * @param  Array  $arr  Array to merge
+     * @param  Array  ...   Additional arrays
+     * @return $this
+     */
+    public function concat() {
+        foreach(func_get_args() as $arr) {
+            $this->_arr = array_merge($this->_arr, array_values($arr));
+        }
+
+        return $this;
+    }
+
+    // Non-Arr-returning utilities //
+
     /**
 	 * Returns the string formed by concatenating the array elements with the
      * join string between each one, a la implode
@@ -101,6 +126,8 @@ class Arr {
     public function implode($string) {
         return implode($string, $this->_arr);
     }
+
+    // Copy-modifiers //
 
     /**
 	 * Returns the Arr formed by applying $function to each element of this
@@ -181,16 +208,5 @@ class Arr {
         }
             
         return new static(uasort($this->_arr, $function));
-    }
-
-
-    /**
-	 * Return the values of the array in whatever internal order they are in,
-     * effectively discarding the keys and making an ordinal array.
-     *
-     * @return  \Arr\Arr
-	 */
-    public function values() {
-        return new static(array_values($this->_arr));
     }
 }
