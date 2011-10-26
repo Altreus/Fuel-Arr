@@ -114,7 +114,7 @@ class Arr {
             }
         }
 
-		return new static($take);
+		return $take;
     }
 
     // Mutators //
