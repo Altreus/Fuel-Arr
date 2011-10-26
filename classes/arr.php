@@ -5,10 +5,10 @@
  * functions, as well as adding a few that PHP should support but which are
  * presumably too complex for PHP users to understand.
  *
- * This is currently intended to represent an ordinal array, but a future
- * development will allow non-numeric keys to work, given that PHP's associative
- * arrays have an unfathomable internal ordering and hence it should be
- * workable.
+ * The Arr class represents an ordinal array, which means that keys are
+ * restricted to positive integers. It also means the array is both ordered and
+ * contiguous. This allows array access by negative index to do the expected
+ * thing and count from the end of the array.
  *
  * @package     Arr
  */
@@ -33,18 +33,30 @@ class Arr implements ArrayAccess, Iterator {
      * a new Arr using that. Otherwise, all parameters are shoved into their
      * own array and that is used instead.
 	 *
+	 * If the array looks like an ordinal array, an object of type Arr is
+	 * returned; otherwise an object of type Assoc is returned. If it looks like
+	 * an ordinal array but should be treated as an associative array, use
+	 * \Arr\Assoc::forge() directly.
+	 *
 	 * @param   mixed   $var1   Either an array or not an array
      * @param   mixed   ...     More things of any type
-     * @return  \Arr\Arr
+     * @return  \Arr\Arr, \Arr\Assoc
 	 */
     public static function forge() {
         $args = func_get_args();
 
         if (count($args) == 1 && is_array($args[0])) {
-            return new static($args[0]);
+			// This seems like a reasonable way to test whether it's a
+			// contiguous ordinal array or not!
+			if (array_keys($args[0]) == array_keys(array_values($args[0]))) {
+	            return new static($args[0]);
+			}
+			else {
+				return Assoc::forge($args[0]);
+			}
         }
         else {
-            return new static($args);
+			return new static($args);
         }
     }
 
