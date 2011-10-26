@@ -113,6 +113,8 @@ class Arr {
                 $take->push( $this->_arr[$arg] );
             }
         }
+
+		return new static($take);
     }
 
     // Mutators //
