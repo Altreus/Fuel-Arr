@@ -15,7 +15,7 @@
 
 namespace Arr;
 
-class Arr {
+class Arr implements ArrayAccess, Iterator {
     protected $_arr;
     
     /**
@@ -121,7 +121,7 @@ class Arr {
 
     /**
      * Adds these arrays to the array, merging them all and destroying any
-     * key/value associations. Modifies the object.
+     * key/value associations. Modifies the object. Returns itself for chaining.
      *
      * @param   Array   $arr    Array to merge
      * @param   Array   ...     Additional arrays
@@ -297,4 +297,36 @@ class Arr {
     public function values() {
         return new static(array_values($this->_arr));
     }
+
+	// ArrayAccess //
+	public function offsetExists($offset) {
+		return array_key_exists($offset, $this->_arr);
+	}
+	public function offsetGet($offset) {
+		return $this->_arr[$offset];
+	}
+	public function offsetSet($offset, $value) {
+		if (is_null($offset)) $this->_arr[] = $value;
+		else $this->_arr[$offset] = $value;
+	}
+	public function offsetUnset($offset) {
+		unset($this->_arr[$offset]);
+	}
+
+	// Iterator //
+	public function current() {
+		return current($this->_arr);
+	}
+	public function key() {
+		return key($this->_arr);
+	}
+	public function next() {
+		return next($this->_arr);
+	}
+	public function rewind() {
+		return reset($this->_arr);
+	}
+	public function valid() {
+		return key($this->_arr) !== null;
+	}
 }
