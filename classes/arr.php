@@ -119,6 +119,15 @@ class Arr implements ArrayAccess, Iterator {
 
     // Mutators //
 
+	/**
+	 * Return a reversed copy of the current array
+	 *
+	 * @return \Arr\Arr
+	 */
+	public function reverse() {
+		return new static(array_reverse($this->_arr, false));
+	}
+
     /**
      * Adds these arrays to the array, merging them all and destroying any
      * key/value associations. Modifies the object. Returns itself for chaining.
